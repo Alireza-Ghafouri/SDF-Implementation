@@ -28,6 +28,9 @@ def ready_to_fire(node):
         return True
     return False
 
+def print_token(token_number , token_time):
+    print("out token " , token_number , " received at:" , token_time)
+
 time_limit=int (input("time limitation:") )
 matrix , marking , actor_process_times = read_file()
 actor_list=[]
@@ -58,9 +61,10 @@ while (total_time <= time_limit):
             for item in node.input:
                 marking[item[0]] -= item[1]
             node.busy=True
-            #if len(node.output) ==0 :
-            #    num_of_out_tokens+=1
-            #    print_token (num_of_out_tokens,total_time)
+            if len(node.output) ==0 :
+                num_of_out_tokens+=1
+                print_token (num_of_out_tokens,total_time)
+                node.busy=False
 
     total_time+=1
 
