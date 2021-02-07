@@ -28,7 +28,7 @@ def ready_to_fire(node):
         return True
     return False
 
-time_limit=input("time limitation:")
+time_limit=int (input("time limitation:") )
 matrix , marking , actor_process_times = read_file()
 actor_list=[]
 # forming actor list
@@ -43,6 +43,25 @@ for i in range (len (actor_process_times)):
 
     actor_list.append( actor( actor_process_times[i] , inp , out ) )
 
-#print(ready_to_fire(actor_list[1]))
+total_time=0
+num_of_out_tokens=0
+while (total_time <= time_limit):
+    for node in actor_list:
+        if node.busy :
+            node.timer+=1
+            if node.timer==node.proc_time:
+                for item in node.output:
+                    marking[item[0]] += item[1]
+                node.timer=0
+                node.busy=False
+        if ready_to_fire(node)==True and node.busy==False :
+            for item in node.input:
+                marking[item[0]] -= item[1]
+            node.busy=True
+            #if len(node.output) ==0 :
+            #    num_of_out_tokens+=1
+            #    print_token (num_of_out_tokens,total_time)
+
+    total_time+=1
 
 
