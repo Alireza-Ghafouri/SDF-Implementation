@@ -3,7 +3,8 @@ def read_file():
     matrix= [[int(num) for num in line.split(",")] for line in file.readlines()]
     file= open ("marking_vector.txt" , "rt")
     marking= [int(line) for line in file.readlines()]
-    #return matrix , marking
-    
+    file= open( "actor_process_times.txt" , "rt")
+    actor_process_times=[int (num) for num in file.readline().split(",")]
+    #return matrix , marking , actor_process_times
 
 
