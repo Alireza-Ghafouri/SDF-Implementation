@@ -5,6 +5,6 @@ def read_file():
     marking= [int(line) for line in file.readlines()]
     file= open( "actor_process_times.txt" , "rt")
     actor_process_times=[int (num) for num in file.readline().split(",")]
-    #return matrix , marking , actor_process_times
+    return matrix , marking , actor_process_times
 
 
