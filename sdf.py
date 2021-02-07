@@ -15,11 +15,23 @@ class actor:
         self.input=inp
         self.output=[]
         self.output=out
+        self.timer=0
 
-number_of_input_tokens= input("number of input tokens:")
-#time_limit=input("time limitation:")
+def ready_to_fire(node):
+    if len(node.input) ==0:
+        return True
+    temp=0
+    for item in node.input:
+            if marking[item[0]] >= item[1]:
+                temp+=1
+    if temp==len(node.input):
+        return True
+    return False
+
+time_limit=input("time limitation:")
 matrix , marking , actor_process_times = read_file()
 actor_list=[]
+# forming actor list
 for i in range (len (actor_process_times)):
     inp=[]
     out=[]
@@ -27,17 +39,10 @@ for i in range (len (actor_process_times)):
         if matrix[x][i] > 0:
             out.append([ x , matrix[x][i] ])
         elif matrix[x][i] <0 :
-            if i==0:
-                inp=[-1,number_of_input_tokens,number_of_input_tokens]
-            else:
-                inp.append([ x , marking[x] , -1* matrix[x][i] ])
+            inp.append([ x , -1* matrix[x][i] ])
 
     actor_list.append( actor( actor_process_times[i] , inp , out ) )
 
-#temp=0
-#for item in actor_list:
-    #print("actor" ,temp," output:", item.output)
-    #print("actor" ,temp," input:", item.input)
-    #temp=temp+1
+#print(ready_to_fire(actor_list[1]))
 
 
