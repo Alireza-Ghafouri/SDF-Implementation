@@ -8,9 +8,9 @@ def read_file():
     return matrix , marking , actor_process_times
 
 class actor:
-    def __init__(self, proc_time, inp, out, busy=False ):
+    def __init__(self, proc_time, inp, out ):
         self.proc_time= int(proc_time)
-        self.busy=bool(busy)
+        self.busy=False
         self.input=[]
         self.input=inp
         self.output=[]
@@ -30,15 +30,26 @@ def ready_to_fire(node):
 
 def print_token(token_number , token_time):
     print("out token " , token_number , " received at:" , token_time)
+    global latency
+    global max_time_distance
+    global last_token_time
+    if max_time_distance < token_time - last_token_time:
+        max_time_distance= token_time - last_token_time
+    last_token_time=token_time
+    
+    if token_number == wanted_token_for_latency:
+        latency = token_time - producer_node_first_activation
+    
 
 time_limit=int (input("time limitation:") )
 matrix , marking , actor_process_times = read_file()
 actor_list=[]
+
 # forming actor list
-for i in range (len (actor_process_times)):
+for i in range (len (actor_process_times)):     #actors
     inp=[]
     out=[]
-    for x in range ( len(matrix) ) :
+    for x in range ( len(matrix) ) :            #edges
         if matrix[x][i] > 0:
             out.append([ x , matrix[x][i] ])
         elif matrix[x][i] <0 :
@@ -46,6 +57,12 @@ for i in range (len (actor_process_times)):
 
     actor_list.append( actor( actor_process_times[i] , inp , out ) )
 
+
+latency=0
+last_token_time=0
+max_time_distance=0
+first_node_fire=False
+#wanted_token_for_latency=0
 total_time=0
 num_of_out_tokens=0
 while (total_time <= time_limit):
@@ -58,6 +75,19 @@ while (total_time <= time_limit):
                 node.timer=0
                 node.busy=False
         if ready_to_fire(node)==True and node.busy==False :
+
+            if actor_list.index(node) == 0 and first_node_fire==False:      # producer node (calculating latency)
+                producer_node_first_activation = total_time
+                first_node_fire=True
+                producer_node_input_edges= [ind[0] for ind in node.input]
+                all_toknes=0
+                temp_tokens=0
+                for temp in marking:
+                    all_toknes += temp
+                for i in producer_node_input_edges:
+                    temp_tokens += marking[i]
+                wanted_token_for_latency= all_toknes - temp_tokens + num_of_out_tokens + 1
+                
             for item in node.input:
                 marking[item[0]] -= item[1]
             node.busy=True
@@ -67,5 +97,18 @@ while (total_time <= time_limit):
                 node.busy=False
 
     total_time+=1
+
+throughput= "1/" + str(max_time_distance)
+print("----------------------------------")
+if (latency == 0):  
+    print ("the time limitation you entered was not enough to calculate the exact latency of the system")
+    print ("the time limitation you entered was not enough to calculate the certain throughput of the system")
+else:  
+    print ("latency:",latency)
+    if max_time_distance==0:
+        print ("the time limitation you entered was not enough to calculate the exact throughput of the system")
+    else:
+        print("throughput:" ,throughput )
+
 
 
