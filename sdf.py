@@ -31,21 +31,30 @@ def ready_to_fire(node):
 def print_token(token_number , token_time):
     print("out token " , token_number , " received at:" , token_time)
     global latency
-    global max_time_distance
-    global last_token_time
-    if max_time_distance < token_time - last_token_time:
-        max_time_distance= token_time - last_token_time
-    last_token_time=token_time
+    global throughput_temp
+    global throughput
+
+    # global max_time_distance
+    # global last_token_time
+    # if max_time_distance < token_time - last_token_time:
+    #     max_time_distance= token_time - last_token_time
+    # last_token_time=token_time
     
     if token_number == wanted_token_for_latency:
         latency = token_time - producer_node_first_activation
+        throughput_temp=token_time
+    elif token_number == wanted_token_for_latency +1 :
+        throughput = "1/" + str ( token_time - throughput_temp)
     
 
 time_limit=int (input("time limitation:") )
 matrix , marking , actor_process_times = read_file()
 actor_list=[]
+print("--------------------------------------------")
+print("         OUT TOKENS INFO")
+print("--------------------------------------------")
 
-# forming actor list
+# FORMING ACTOR LISTS
 for i in range (len (actor_process_times)):     #actors
     inp=[]
     out=[]
@@ -57,14 +66,19 @@ for i in range (len (actor_process_times)):     #actors
 
     actor_list.append( actor( actor_process_times[i] , inp , out ) )
 
+# MAIN
 
 latency=0
-last_token_time=0
-max_time_distance=0
-first_node_fire=False
-#wanted_token_for_latency=0
+throughput_temp=0
+# last_token_time=0
+# max_time_distance=0
+wanted_token_for_latency=0
 total_time=0
 num_of_out_tokens=0
+num_of_in_tokens=0
+num_of_initial_tokens=0
+for x in marking:
+    num_of_initial_tokens += x
 while (total_time <= time_limit):
     for node in actor_list:
         if node.busy :
@@ -76,17 +90,22 @@ while (total_time <= time_limit):
                 node.busy=False
         if ready_to_fire(node)==True and node.busy==False :
 
-            if actor_list.index(node) == 0 and first_node_fire==False:      # producer node (calculating latency)
-                producer_node_first_activation = total_time
-                first_node_fire=True
-                producer_node_input_edges= [ind[0] for ind in node.input]
-                all_toknes=0
-                temp_tokens=0
-                for temp in marking:
-                    all_toknes += temp
-                for i in producer_node_input_edges:
-                    temp_tokens += marking[i]
-                wanted_token_for_latency= all_toknes - temp_tokens + num_of_out_tokens + 1
+            if actor_list.index(node) == 0:
+                num_of_in_tokens +=1
+                if num_of_in_tokens == 1:      # Producer Node First Fire 
+                    producer_node_first_activation = total_time
+                    producer_node_input_edges= [ind[0] for ind in node.input]
+                    all_toknes=0
+                    temp_tokens=0
+                    for temp in marking:
+                        all_toknes += temp
+                    for i in producer_node_input_edges:
+                        temp_tokens += marking[i]
+                    wanted_token_for_latency= all_toknes - temp_tokens + num_of_out_tokens + 1
+                
+
+                    
+                
                 
             for item in node.input:
                 marking[item[0]] -= item[1]
@@ -98,17 +117,60 @@ while (total_time <= time_limit):
 
     total_time+=1
 
-throughput= "1/" + str(max_time_distance)
-print("----------------------------------")
-if (latency == 0):  
-    print ("the time limitation you entered was not enough to calculate the exact latency of the system")
-    print ("the time limitation you entered was not enough to calculate the certain throughput of the system")
-else:  
-    print ("latency:",latency)
-    if max_time_distance==0:
-        print ("the time limitation you entered was not enough to calculate the exact throughput of the system")
+# nm_throughput= "1/" + str(max_time_distance)
+
+
+# PRINTING RESULTS
+
+if num_of_out_tokens ==0:
+    print("No output token!")
+print("--------------------------------------------")
+print("         SYSTEM FUNCTION")
+print("--------------------------------------------")
+if (latency == 0):
+    if wanted_token_for_latency ==0:
+        print("Time limitation too law!")
+        print("The producer actor even did not fire! ")
     else:
-        print("throughput:" ,throughput )
+        print ("Unable to calculate latency!")
+        print("     Not enough time limitation!")
+    print ("Unable to calculate throughput!")
+    print("     Not enough time limitation!")
+else:  
+    print ("Latency:",latency)
+    print("Throughput:" , throughput)
+
+    # if max_time_distance==0:
+    #     print ("the time limitation you entered was not enough to calculate the certain throughput of the system")
+    # else:
+    #     print("Non Memmory Throughput:" ,nm_throughput )
+    
+
+print("--------------------------------------------")
+print("         FINAL SYSTEM INFO")
+print("--------------------------------------------")
+print("End system marking:")
+print(" ")
+
+edge=1
+for x in marking:
+    print(" Edge" , edge , ":" , x)
+    edge +=1
+num_of_busy_actors=0
+for act in actor_list:
+    if act.busy:
+        num_of_busy_actors +=1
+
+print(" ")
+print("Number of tokens entered the system:" , num_of_in_tokens)
+print("Number of tokens left the system:" , num_of_out_tokens)
+print("Number of initial tokens:" , num_of_initial_tokens)
+print("Number of busy actors :", num_of_busy_actors)
+print("--------------------------------------------")
+
+
+
+
 
 
 
