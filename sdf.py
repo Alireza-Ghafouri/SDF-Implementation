@@ -1,3 +1,6 @@
+from igraph import *
+import igraph as ig
+
 def read_file():
     file= open ("topology_matrix.txt","rt")
     matrix= [[int(num) for num in line.split(",")] for line in file.readlines()]
@@ -69,6 +72,66 @@ def print_log(actor_token_number ,status, token_time):
     f.write(result)
     f.write("\n")
 
+def draw_graph():
+    global actor_process_times
+    global matrix
+
+    g = Graph(directed=True)
+
+    #add vertices
+    g.add_vertices(len(actor_process_times))
+    for i in range(len(g.vs)):
+        g.vs[i]["id"]= i
+    
+        if i==0: 
+            g.vs[i]["label"]= "SRC"
+        elif i== len(actor_process_times) -1:
+            g.vs[i]["label"]= "SNK"
+        else:
+            # g.vs[i]["label"]= str(i)
+            g.vs[i]["label"]= str(actor_process_times[i])
+
+    #add edges
+    edges=[]
+    weights=[]
+    labels=[]
+    for e in range ( len(matrix) ):
+        weights.append(0)
+        for v in range ( len(actor_process_times)):
+            if matrix[e][v] > 0:
+                temp1=matrix[e][v]
+                v1=v
+            elif matrix[e][v] <0 :
+                temp2= -1 * matrix[e][v]
+                v2=v
+        edges.append( (v1,v2) )
+        labels.append ( str(temp1) + "..." + str(temp2) )
+
+    g.add_edges(edges)
+    g.es['weight'] = weights
+    g.es['label'] = labels
+    # ig.plot(g)
+    ###########################
+    visual_style = {}
+    out_name = "graph.png"
+    # Set bbox and margin
+    visual_style["bbox"] = (1400,800)
+    visual_style["margin"] = 27
+    # Set vertex colours
+    visual_style["vertex_color"] = 'yellow'
+    # Set vertex size
+    visual_style["vertex_size"] = 60
+    # Set vertex lable size
+    visual_style["vertex_label_size"] = 22
+    # Don't curve the edges
+    visual_style["edge_curved"] = False
+    # Set the layout
+    my_layout = g.layout_lgl()
+    visual_style["layout"] = my_layout
+    # Plot the graph
+    ig.plot(g, out_name, **visual_style)
+
+  
 time_limit=int (input("time limitation:") )
 matrix , marking , actor_process_times = read_file()
 f=open("System_Report.txt",'w')
@@ -219,9 +282,4 @@ f.writelines(["Number of initial tokens: " , str(num_of_initial_tokens), "\n"])
 f.writelines(["Number of busy actors : ", str(num_of_busy_actors), "\n"])
 # f.write("--------------------------------------------\n")
 
-
-
-
-
-
-
+draw_graph()
