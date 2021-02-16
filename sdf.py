@@ -49,6 +49,7 @@ def print_log(actor_token_number ,status, token_time):
         global latency
         global throughput_temp
         global throughput
+        global f
 
         # global max_time_distance
         # global last_token_time
@@ -63,15 +64,21 @@ def print_log(actor_token_number ,status, token_time):
             throughput = "1/" + str ( token_time - throughput_temp)
 
             
-    print(result)
-    print(" ")
+    # print(result)
+    # print(" ")
+    f.write(result)
+    f.write("\n")
 
 time_limit=int (input("time limitation:") )
 matrix , marking , actor_process_times = read_file()
+f=open("System_Report.txt",'w')
 actor_list=[]
-print("--------------------------------------------")
-print("         HISTORY OF EVENTS")
-print("--------------------------------------------")
+# print("--------------------------------------------")
+# print("         HISTORY OF EVENTS")
+# print("--------------------------------------------")
+f.write("--------------------------------------------\n")
+f.write("         HISTORY OF EVENTS\n")
+f.write("--------------------------------------------\n")
 
 # FORMING ACTOR LISTS
 for i in range (len (actor_process_times)):     #actors
@@ -143,22 +150,34 @@ while (total_time <= time_limit):
 # PRINTING RESULTS
 
 if num_of_out_tokens ==0:
-    print("No output token!")
-print("--------------------------------------------")
-print("         SYSTEM FUNCTION")
-print("--------------------------------------------")
+    # print("No output token!")
+    f.write("No output token!\n")
+# print("--------------------------------------------")
+# print("         SYSTEM FUNCTION")
+# print("--------------------------------------------")
+f.write("--------------------------------------------\n")
+f.write("         SYSTEM FUNCTION\n")
+f.write("--------------------------------------------\n")
 if (latency == 0):
     if wanted_token_for_latency ==0:
-        print("Time limitation too law!")
-        print("The producer actor even did not fire! ")
+        # print("Time limitation too law!")
+        # print("The producer actor even did not fire!")
+        f.write("Time limitation too law!\n")
+        f.write("The producer actor even did not fire!\n")
     else:
-        print ("Unable to calculate latency!")
-        print("     Not enough time limitation!")
-    print ("Unable to calculate throughput!")
-    print("     Not enough time limitation!")
+        # print("Unable to calculate latency!")
+        # print("     Not enough time limitation!")
+        f.write("Unable to calculate latency!\n")
+        f.write("     Not enough time limitation!\n")
+    # print("Unable to calculate throughput!")
+    # print("     Not enough time limitation!")
+    f.write("Unable to calculate throughput!\n")
+    f.write("     Not enough time limitation!\n")
 else:  
-    print ("Latency:",latency)
-    print("Throughput:" , throughput)
+    # print("Latency:",latency)
+    # print("Throughput:" , throughput)
+    f.writelines(["Latency: ",str(latency),"\n"])
+    f.writelines(["Throughput: " , str(throughput) ,"\n"])
 
     # if max_time_distance==0:
     #     print ("the time limitation you entered was not enough to calculate the certain throughput of the system")
@@ -166,27 +185,39 @@ else:
     #     print("Non Memmory Throughput:" ,nm_throughput )
     
 
-print("--------------------------------------------")
-print("         FINAL SYSTEM INFO")
-print("--------------------------------------------")
-print("End system marking:")
-print(" ")
+# print("--------------------------------------------")
+# print("         FINAL SYSTEM INFO")
+# print("--------------------------------------------")
+# print("End system marking:")
+# print(" ")
+f.write("--------------------------------------------\n")
+f.write("         FINAL SYSTEM INFO\n")
+f.write("--------------------------------------------\n")
+f.write("End system marking:\n")
+f.write("\n")
 
 edge=1
 for x in marking:
-    print(" Edge" , edge , ":" , x)
+    # print(" Edge" , edge , ":" , x)
+    f.writelines([" Edge" , str(edge) , ": " , str(x) , "\n"])
     edge +=1
 num_of_busy_actors=0
 for act in actor_list:
     if act.busy:
         num_of_busy_actors +=1
 
-print(" ")
-print("Number of tokens entered the system:" , num_of_in_tokens)
-print("Number of tokens left the system:" , num_of_out_tokens)
-print("Number of initial tokens:" , num_of_initial_tokens)
-print("Number of busy actors :", num_of_busy_actors)
-print("--------------------------------------------")
+# print(" ")
+# print("Number of tokens entered the system:" , num_of_in_tokens)
+# print("Number of tokens left the system:" , num_of_out_tokens)
+# print("Number of initial tokens:" , num_of_initial_tokens)
+# print("Number of busy actors :", num_of_busy_actors)
+# print("--------------------------------------------")
+f.write("\n")
+f.writelines(["Number of tokens entered the system: " , str(num_of_in_tokens), "\n"])
+f.writelines(["Number of tokens left the system: " , str(num_of_out_tokens), "\n"])
+f.writelines(["Number of initial tokens: " , str(num_of_initial_tokens), "\n"])
+f.writelines(["Number of busy actors : ", str(num_of_busy_actors), "\n"])
+# f.write("--------------------------------------------\n")
 
 
 
