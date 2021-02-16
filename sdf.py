@@ -28,30 +28,49 @@ def ready_to_fire(node):
         return True
     return False
 
-def print_token(token_number , token_time):
-    print("out token " , token_number , " received at:" , token_time)
-    global latency
-    global throughput_temp
-    global throughput
+def print_log(actor_token_number ,status, token_time):
+    
+    if status == "activated":
+        result= str(token_time) + ": actor number " + str(actor_token_number) + " " + status
+        if actor_token_number ==0 :
+            result= str(token_time) + ": SRC " + status
+        elif actor_token_number == len(actor_process_times) -1:
+            result= str(token_time) + ": SNK " + status
 
-    # global max_time_distance
-    # global last_token_time
-    # if max_time_distance < token_time - last_token_time:
-    #     max_time_distance= token_time - last_token_time
-    # last_token_time=token_time
+    elif status == "fired":
+        result= str(token_time) + ": actor number " + str(actor_token_number) + " " + status
+        if actor_token_number ==0 :
+            result= str(token_time) + ": SRC " + status
+        elif actor_token_number == len(actor_process_times) -1:
+            result= str(token_time) + ": SNK " + status
+    elif status == "exited":
+        result= str(token_time) + ": out token " + str(actor_token_number) + " " + status + " from SNK" 
     
-    if token_number == wanted_token_for_latency:
-        latency = token_time - producer_node_first_activation
-        throughput_temp=token_time
-    elif token_number == wanted_token_for_latency +1 :
-        throughput = "1/" + str ( token_time - throughput_temp)
+        global latency
+        global throughput_temp
+        global throughput
+
+        # global max_time_distance
+        # global last_token_time
+        # if max_time_distance < token_time - last_token_time:
+        #     max_time_distance= token_time - last_token_time
+        # last_token_time=token_time
     
+        if actor_token_number == wanted_token_for_latency:
+            latency = token_time - producer_node_first_activation
+            throughput_temp=token_time
+        elif actor_token_number == wanted_token_for_latency +1 :
+            throughput = "1/" + str ( token_time - throughput_temp)
+
+            
+    print(result)
+    print(" ")
 
 time_limit=int (input("time limitation:") )
 matrix , marking , actor_process_times = read_file()
 actor_list=[]
 print("--------------------------------------------")
-print("         OUT TOKENS INFO")
+print("         HISTORY OF EVENTS")
 print("--------------------------------------------")
 
 # FORMING ACTOR LISTS
@@ -88,8 +107,9 @@ while (total_time <= time_limit):
                     marking[item[0]] += item[1]
                 node.timer=0
                 node.busy=False
+                print_log( actor_list.index(node) , "fired" , total_time )
         if ready_to_fire(node)==True and node.busy==False :
-
+        
             if actor_list.index(node) == 0:
                 num_of_in_tokens +=1
                 if num_of_in_tokens == 1:      # Producer Node First Fire 
@@ -103,7 +123,7 @@ while (total_time <= time_limit):
                         temp_tokens += marking[i]
                     wanted_token_for_latency= all_toknes - temp_tokens + num_of_out_tokens + 1
                 
-
+            print_log ( actor_list.index(node) , "activated" , total_time )
                     
                 
                 
@@ -112,7 +132,7 @@ while (total_time <= time_limit):
             node.busy=True
             if len(node.output) ==0 :
                 num_of_out_tokens+=1
-                print_token (num_of_out_tokens,total_time)
+                print_log (num_of_out_tokens, "exited", total_time)
                 node.busy=False
 
     total_time+=1
