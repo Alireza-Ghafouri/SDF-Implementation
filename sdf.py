@@ -1,5 +1,5 @@
-from igraph import *
-import igraph as ig
+# from igraph import *
+# import igraph as ig
 
 def read_file():
     file= open ("topology_matrix.txt","rt")
@@ -21,8 +21,12 @@ class actor:
         self.timer=0
 
 def ready_to_fire(node):
+    global num_of_in_tokens
+    global user_tokens
     if len(node.input) ==0:
-        return True
+        if num_of_in_tokens < user_tokens:
+            return True
+        return False
     temp=0
     for item in node.input:
             if marking[item[0]] >= item[1]:
@@ -133,6 +137,7 @@ def draw_graph():
 
   
 time_limit=int (input("time limitation:") )
+user_tokens=int (input ("number of input tokens:"))
 matrix , marking , actor_process_times = read_file()
 f=open("System_Report.txt",'w')
 actor_list=[]
@@ -159,6 +164,7 @@ for i in range (len (actor_process_times)):     #actors
 
 latency=0
 throughput_temp=0
+throughput =""
 # last_token_time=0
 # max_time_distance=0
 wanted_token_for_latency=0
@@ -168,7 +174,7 @@ num_of_in_tokens=0
 num_of_initial_tokens=0
 for x in marking:
     num_of_initial_tokens += x
-while (total_time <= time_limit):
+while (total_time <= time_limit and num_of_out_tokens <= num_of_initial_tokens + user_tokens):
     for node in actor_list:
         if node.busy :
             node.timer+=1
@@ -192,14 +198,28 @@ while (total_time <= time_limit):
                     for i in producer_node_input_edges:
                         temp_tokens += marking[i]
                     wanted_token_for_latency= all_toknes - temp_tokens + num_of_out_tokens + 1
-                
+
+                    
             print_log ( actor_list.index(node) , "activated" , total_time )
+            
+            if actor_process_times[0]==0 and actor_list.index(node) == 0:
+                print_log( actor_list.index(node), "fired" , total_time )
+                for i in range (user_tokens-1):
+                    print_log ( actor_list.index(node) , "activated" , total_time )
+                    print_log( actor_list.index(node), "fired" , total_time )
+
+                for item in node.output:
+                    marking[item[0]] += item[1] *user_tokens
+                num_of_in_tokens += user_tokens-1
+                
+                node.busy=False
                     
                 
-                
-            for item in node.input:
-                marking[item[0]] -= item[1]
-            node.busy=True
+            else:    
+                for item in node.input:
+                    marking[item[0]] -= item[1]
+                node.busy=True
+
             if len(node.output) ==0 :
                 num_of_out_tokens+=1
                 print_log (num_of_out_tokens, "exited", total_time)
@@ -240,7 +260,11 @@ else:
     # print("Latency:",latency)
     # print("Throughput:" , throughput)
     f.writelines(["Latency: ",str(latency),"\n"])
-    f.writelines(["Throughput: " , str(throughput) ,"\n"])
+    if throughput== "" :
+        f.write("Unable to calculate throughput!\n")
+
+    else:
+        f.writelines(["Throughput: " , str(throughput) ,"\n"])
 
     # if max_time_distance==0:
     #     print ("the time limitation you entered was not enough to calculate the certain throughput of the system")
@@ -282,4 +306,4 @@ f.writelines(["Number of initial tokens: " , str(num_of_initial_tokens), "\n"])
 f.writelines(["Number of busy actors : ", str(num_of_busy_actors), "\n"])
 # f.write("--------------------------------------------\n")
 
-draw_graph()
+# draw_graph()
