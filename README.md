@@ -1,8 +1,9 @@
 # what does this repo is about ?
-this repository simulates and analysis a <a href=https://www.youtube.com/watch?v=fMhmVQGwNOc&t=375s>SDF</a> .
+this repository simulates and analysis a <a href=https://www.youtube.com/watch?v=fMhmVQGwNOc&t=375s/>SDF</a> .
 
 # running
-[![Open In Colab](https://colab.research.google.com/github/Mehrdadghassabi/SDF-Implementation/blob/master/SDF_graph.ipynb)
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mehrdadghassabi/SDF-Implementation/blob/master/SDF_graph.ipynb)
 
 # Text Files
 
