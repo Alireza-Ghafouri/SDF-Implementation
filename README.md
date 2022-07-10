@@ -1,5 +1,5 @@
 # what does this repo is about ?
-<a href="https://www.youtube.com/watch?v=fMhmVQGwNOc&t=375s"/>SDF</a>
+This repository simulates and analysis a <a href="https://www.youtube.com/watch?v=fMhmVQGwNOc&t=375s"/>SDF</a>
 
 # running
 
